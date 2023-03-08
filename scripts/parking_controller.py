@@ -27,6 +27,10 @@ class ParkingController():
         self.relative_y = 0
 
     def relative_cone_callback(self, msg):
+        '''
+        Callback when a new cone position is received.
+        msg has two float32 (x_pos, y_pos); x+ is forward, y+ is to the left
+        '''
         self.relative_x = msg.x_pos
         self.relative_y = msg.y_pos
         drive_cmd = AckermannDriveStamped()
