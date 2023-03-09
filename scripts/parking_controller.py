@@ -26,11 +26,12 @@ class ParkingController():
         self.relative_x = 0
         self.relative_y = 0
         
-        self.closer = None #true if car is to drive closer to the cone
         self.angle_tolerance = 0.1
-        self.distance_tolerance = 0.03
-        self.turning_radius = 1 #turning radius of the car
+        self.distance_tolerance = 0.05
+        self.turning_radius = 0.9 #turning radius of the car
         self.drive_speed = 1
+        self.max_steering_angle = 0.34
+        self.forward = None
 
     def relative_cone_callback(self, msg):
         '''
@@ -43,30 +44,37 @@ class ParkingController():
         drive_cmd = AckermannDriveStamped()
 
         #################################
-
+        
+        ## TODO: add support for when cone is not found
+        ## presumably have x_pos, y_pos = 0 be the agreed-upon message
+        
         relative_angle = np.arctan2(self.relative_y,self.relative_x)
         relative_distance = (self.relative_x**2+self.relative_y**2)**0.5
         
         drive_cmd.header.frame_id = 'base_link'
         drive_cmd.header.stamp = rospy.Time()
         
-        if abs(relative_angle) < self.angle_tolerance and \
-           abs(relative_distance-self.parking_distance) < self.distance_tolerance:
-            drive_cmd.drive.speed = 0 #car is parked within tolerance
+        if abs(relative_angle) < self.angle_tolerance: #car is approximately aligned
+            if abs(relative_distance-self.parking_distance) < self.distance_tolerance:
+                drive_cmd.drive.speed = 0 #car is parked within tolerance
+            else: #car needs to drive forward or backward
+                sign = 1 if relative_distance>self.parking_distance else -1
+                drive_cmd.drive.speed = sign*self.drive_speed
+                drive_cmd.drive.steering_angle = 2*sign*relative_angle
+                
         else:
-            if self.closer == None: self.closer = relative_distance>self.parking_distance
+            if self.forward == None: self.forward = relative_distance>self.parking_distance
             
-            #multi-point turn logic
-            if 2*self.turning_radius*np.sin(abs(relative_angle)) > relative_distance:
-                self.closer = False
-            elif self.closer == True and relative_distance < 0.8*self.parking_distance:
-                self.closer = False
-            elif self.closer == False and relative_distance > 1.2*self.parking_distance:
-                self.closer = True
-        
-            sign = 1 if self.closer^(np.cos(relative_angle) < 0) else -1
+            if (self.forward == True and relative_distance < 0.8*self.parking_distance) or \
+               (self.forward == False and relative_distance > 1.2*self.parking_distance):
+                self.forward = not self.forward
+            
+            if self.forward == False or 2*self.turning_radius*np.sin(relative_angle) > relative_distance:
+                sign = -1 #too close to go forward, must reverse first
+            else: sign = 1
+
             drive_cmd.drive.speed = sign*self.drive_speed
-            drive_cmd.drive.steering_angle = sign*relative_angle
+            drive_cmd.drive.steering_angle = sign*np.sign(relative_angle)*self.max_steering_angle
 
         #################################
 
