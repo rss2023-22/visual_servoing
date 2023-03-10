@@ -44,6 +44,11 @@ class ConeDetector():
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         #################################
 
+        #suggestion to whoever works on this for integrating code down the line
+        #send (very?) negative values for pixel coordinates if a cone is not found
+        #since those can never occur "legitimately"
+        #-steven
+
         image = self.bridge.imgmsg_to_cv2(image_msg, "bgr8")
 
         debug_msg = self.bridge.cv2_to_imgmsg(image, "bgr8")

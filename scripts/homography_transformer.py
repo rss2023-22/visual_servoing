@@ -64,6 +64,11 @@ class HomographyTransformer:
         self.h, err = cv2.findHomography(np_pts_image, np_pts_ground)
 
     def cone_detection_callback(self, msg):
+        #suggestion to whoever works on this for integrating code down the line
+        #if negative values are received for the pixel u and v (see cone_detector.py)
+        #send 0,0 as the coordinates so the parking controller knows there's no cone
+        #-steven
+    
         #Extract information from message
         u = msg.u
         v = msg.v

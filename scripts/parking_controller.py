@@ -36,7 +36,10 @@ class ParkingController():
     def relative_cone_callback(self, msg):
         '''
         Callback when a new cone position is received.
+        
         msg has two float32 (x_pos, y_pos); x+ is forward, y+ is to the left
+        When x_pos and y_pos are both exactly zero, the cone is assumed to not be in frame
+        In this case, the car will do nothing
         '''
         self.relative_x = msg.x_pos
         self.relative_y = msg.y_pos
@@ -45,16 +48,16 @@ class ParkingController():
 
         #################################
         
-        ## TODO: add support for when cone is not found
-        ## presumably have x_pos, y_pos = 0 be the agreed-upon message
-        
         relative_angle = np.arctan2(self.relative_y,self.relative_x)
         relative_distance = (self.relative_x**2+self.relative_y**2)**0.5
         
         drive_cmd.header.frame_id = 'base_link'
         drive_cmd.header.stamp = rospy.Time()
         
-        if abs(relative_angle) < self.angle_tolerance: #car is approximately aligned
+        if relative_distance == 0: #no cone found
+            drive_cmd.drive.speed = 0
+        
+        elif abs(relative_angle) < self.angle_tolerance: #car is approximately aligned
             if abs(relative_distance-self.parking_distance) < self.distance_tolerance:
                 drive_cmd.drive.speed = 0 #car is parked within tolerance
             else: #car needs to drive forward or backward
