@@ -93,7 +93,10 @@ def cd_color_segmentation(img, template):
 
 	# step 4: get contours
 	ret,thresh = cv2.threshold(image_dila,127,255,0)
-	contours, _ = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+	_, contours, _ = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+	if len(cnt) == 0: # no box:
+		return ((0,0),(0,0))
+	
 	cnt = contours[-1]
 
 	# step 5: get bounding box
