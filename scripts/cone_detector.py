@@ -49,7 +49,7 @@ class ConeDetector():
             coneLoc.v = -1000.0
         else:
             coneLoc.u = float(int((bounding_box[0][0]+bounding_box[1][0])/2)) # I assume u=x?
-            coneLoc.v = bounding_box[0][1] # I assume v=y?
+            coneLoc.v = bounding_box[1][1] # I assume v=y?
         self.cone_pub.publish(coneLoc)
 
         #suggestion to whoever works on this for integrating code down the line
