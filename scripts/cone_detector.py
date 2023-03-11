@@ -42,7 +42,7 @@ class ConeDetector():
 
         # create ConeLocationPixel object and publish
         coneLoc = ConeLocationPixel()
-        coneLoc.u = int((bounding_box[0][0]+bounding_box[1][0])/2) # I assume u=x?
+        coneLoc.u = float(int((bounding_box[0][0]+bounding_box[1][0])/2)) # I assume u=x?
         coneLoc.v = bounding_box[0][1] # I assume v=y?
         self.cone_pub.publish(coneLoc)
 
