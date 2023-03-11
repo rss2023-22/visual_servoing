@@ -23,31 +23,6 @@ def image_print(img):
 	cv2.waitKey(0)
 	cv2.destroyAllWindows()
 
-def lookupBounds(x):
-	if x == 1:	# decent mask, noise
-		lower_bound = np.array([5,80,80])
-		upper_bound = np.array([20,255,255])
-	elif x == 2: # better mask, less noise, not sensitive to lighter orange
-		lower_bound = np.array([10,100,100])
-		upper_bound = np.array([16,255,255])
-	elif x == 3: # similar to 2, VERY low noise (might be functional)
-		lower_bound = np.array([10,150,150])
-		upper_bound = np.array([16,255,255])
-	elif x == 4: # similar to 3 but more agressive on eliminating noise
-		lower_bound = np.array([5,150,200])
-		upper_bound = np.array([20,255,255])
-	elif x == 5: # similar to 4 but more sensitive to lighter oranges, prob best alone
-		lower_bound = np.array([5,180,190])
-		upper_bound = np.array([25,255,255])
-	elif x == 6: # similar to 5 but more sensitive to lighter oranges, probably the best so far with erode and dilate. Good with 1 and 2 iters. 
-		lower_bound = np.array([5,180,190]) # 180 on the last!
-		upper_bound = np.array([35,255,255])
-	elif x == 7: # similar to 5 but more sensitive to lighter oranges, probably the best so far with erode and dilate. Good with 2 and 5 iters. 
-		lower_bound = np.array([5,180,190])
-		upper_bound = np.array([35,255,255])
-	return [lower_bound,upper_bound]
-
-
 def cd_color_segmentation(img, template):
 	"""
 	Implement the cone detection using color segmentation algorithm
@@ -59,6 +34,30 @@ def cd_color_segmentation(img, template):
 				(x1, y1) is the top left of the bbox and (x2, y2) is the bottom right of the bbox
 	"""
 
+	def lookupBounds(x):
+		if x == 1:	# decent mask, noise
+			lower_bound = np.array([5,80,80])
+			upper_bound = np.array([20,255,255])
+		elif x == 2: # better mask, less noise, not sensitive to lighter orange
+			lower_bound = np.array([10,100,100])
+			upper_bound = np.array([16,255,255])
+		elif x == 3: # similar to 2, VERY low noise (might be functional)
+			lower_bound = np.array([10,150,150])
+			upper_bound = np.array([16,255,255])
+		elif x == 4: # similar to 3 but more agressive on eliminating noise
+			lower_bound = np.array([5,150,200])
+			upper_bound = np.array([20,255,255])
+		elif x == 5: # similar to 4 but more sensitive to lighter oranges, prob best alone
+			lower_bound = np.array([5,180,190])
+			upper_bound = np.array([25,255,255])
+		elif x == 6: # similar to 5 but more sensitive to lighter oranges, probably the best so far with erode and dilate. Good with 1 and 2 iters. 
+			lower_bound = np.array([5,180,190]) # 180 on the last!
+			upper_bound = np.array([35,255,255])
+		elif x == 7: # similar to 5 but more sensitive to lighter oranges, probably the best so far with erode and dilate. Good with 2 and 5 iters. 
+			lower_bound = np.array([5,180,190])
+			upper_bound = np.array([35,255,255])
+		return [lower_bound,upper_bound]
+
 	# PARAMS
 	########
 	# decent combos: bounds=6, 1 iter, 2 iter || bounds=7, 2 iter, 6 iter
@@ -66,7 +65,7 @@ def cd_color_segmentation(img, template):
 	viz_masked_img = False
 	viz_eroded = False
 	viz_dilated = False
-	viz_box = True
+	viz_box = False
 	set_bounds = 7 # 1,2,3,4,5,6
 
 	# BEGIN CODE 
