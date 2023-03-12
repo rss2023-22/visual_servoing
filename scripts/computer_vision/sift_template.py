@@ -39,7 +39,7 @@ def cd_sift_ransac(img, template):
     # Minimum number of matching features
     MIN_MATCH = 10
     # Create SIFT
-    sift = cv2.xfeatures2d.SIFT_create()
+    sift = cv2.xfeatures2d.SIFT_create() 
 
     # Compute SIFT on template and test image
     kp1, des1 = sift.detectAndCompute(template,None)
