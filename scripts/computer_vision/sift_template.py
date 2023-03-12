@@ -77,7 +77,7 @@ def cd_sift_ransac(img, template):
 		return ((x_min, y_min), (x_max, y_max))
 	else:
 
-		print "[SIFT] not enough matches; matches: ", len(good)
+		print("[SIFT] not enough matches; matches: "+str(len(good)))
 
 		# Return bounding box of area 0 if no match found
 		return ((0,0), (0,0))
