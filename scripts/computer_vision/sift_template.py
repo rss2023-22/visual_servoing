@@ -28,7 +28,6 @@ def image_print(img):
 	cv2.destroyAllWindows()
 
 def cd_sift_ransac(img, template):
-<<<<<<< HEAD
 	"""
 	Implement the cone detection using SIFT + RANSAC algorithm
 	Input:
@@ -82,84 +81,6 @@ def cd_sift_ransac(img, template):
 
 		# Return bounding box of area 0 if no match found
 		return ((0,0), (0,0))
-=======
-    """
-    Implement the cone detection using SIFT + RANSAC algorithm
-    Input:
-        img: np.3darray; the input image with a cone to be detected
-    Return:
-        bbox: ((x1, y1), (x2, y2)); the bounding box of the cone, unit in px
-            (x1, y1) is the bottom left of the bbox and (x2, y2) is the top right of the bbox
-    """
-    # Minimum number of matching features
-    MIN_MATCH = 10
-    # Create SIFT
-    sift = cv2.xfeatures2d.SIFT_create() 
-
-    # Compute SIFT on template and test image
-    kp1, des1 = sift.detectAndCompute(template,None)
-    kp2, des2 = sift.detectAndCompute(img,None)
-
-    # Find matches
-    bf = cv2.BFMatcher()
-    matches = bf.knnMatch(des1,des2,k=2)
-
-    # Find and store good matches
-    good = []
-    for m,n in matches:
-        if m.distance < 0.75*n.distance:
-            good.append(m)
-
-    # If enough good matches, find bounding box
-    if len(good) > MIN_MATCH:
-        src_pts = np.float32([ kp1[m.queryIdx].pt for m in good ]).reshape(-1,1,2)
-        dst_pts = np.float32([ kp2[m.trainIdx].pt for m in good ]).reshape(-1,1,2)
-
-        # Create mask
-        M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
-        matchesMask = mask.ravel().tolist()
-
-#         h, w = template.shape
-        h, w = template.shape[:2] #changed from above
-        pts = np.float32([ [0,0],[0,h-1],[w-1,h-1],[w-1,0] ]).reshape(-1,1,2)
-
-        ########## YOUR CODE STARTS HERE ##########
-        
-        dst = cv2.perspectiveTransform(pts,M)
-
-        draw_params = dict(matchColor = (0,255,0), # draw matches in green color
-                       singlePointColor = None,
-                       matchesMask = matchesMask, # draw only inliers
-                       flags = 2)
-
-        # draws matches
-#         img3 = cv2.drawMatches(template,kp1,img,kp2,good, None,**draw_params)
-
-        # Draw bounding box in Red
-#         img3 = cv2.polylines(img, [np.int32(dst)], True, (0,0,255),3, cv2.LINE_AA)
-#         cv2.imshow("result", img3)
-#         cv2.waitKey()
-
-        # get bounding box
-        contours = np.int32(dst)       
-        all_x = [i[0][0] for i in contours]
-        all_y = [i[0][1] for i in contours] 
-        x_min = min(all_x)
-        x_max = max(all_x)
-        y_min = min(all_y)
-        y_max = max(all_y)
-
-        ########### YOUR CODE ENDS HERE ###########
-
-        # Return bounding box
-        return ((x_min, y_min), (x_max, y_max))
-    else:
-
-        print("[SIFT] not enough matches; matches: ", len(good))
-
-        # Return bounding box of area 0 if no match found
-        return ((0,0), (0,0))
->>>>>>> 5e1177abe0985ca38e419d31cda2750137a72c9b
 
 def cd_template_matching(img, template):
     """
