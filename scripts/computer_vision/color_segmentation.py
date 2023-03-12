@@ -72,8 +72,8 @@ def cd_color_segmentation(img, template):
 	# PARAMS
 	########
 	# decent combos: bounds=6, 1 iter, 2 iter || bounds=7, 2 iter, 6 iter
-	viz_original_img = True
-	viz_masked_img = True
+	viz_original_img = False
+	viz_masked_img = False
 	viz_eroded = False
 	viz_dilated = False
 	viz_box = False
