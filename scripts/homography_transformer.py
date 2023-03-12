@@ -80,9 +80,10 @@ class HomographyTransformer:
         #Extract information from message
         u = msg.u
         v = msg.v
-
+        
         #Call to main function
-        x, y = self.transformUvToXy(u, v)
+        if u < 0 and v < 0: x,y = 0,0
+        else: x, y = self.transformUvToXy(u, v)
 
         #Publish relative xy position of object in real world
         relative_xy_msg = ConeLocation()

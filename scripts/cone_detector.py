@@ -38,7 +38,7 @@ class ConeDetector():
         # convert it to the car frame.
 
         img = self.bridge.imgmsg_to_cv2(image_msg, "bgr8") # is this right? convert msg to cv2 format. 
-        bounding_box = cd_color_segmentation(img)  # (x,y),(x+w,y+h)
+        bounding_box = cd_color_segmentation(img,None)  # (x,y),(x+w,y+h)
         noCone = ((0,0),(0,0))
              
 
@@ -51,11 +51,6 @@ class ConeDetector():
             coneLoc.u = float(int((bounding_box[0][0]+bounding_box[1][0])/2)) # I assume u=x?
             coneLoc.v = bounding_box[1][1] # I assume v=y?
         self.cone_pub.publish(coneLoc)
-
-        #suggestion to whoever works on this for integrating code down the line
-        #send (very?) negative values for pixel coordinates if a cone is not found
-        #since those can never occur "legitimately"
-        #-steven
 
         image = self.bridge.imgmsg_to_cv2(image_msg, "bgr8")
         debug_msg = self.bridge.cv2_to_imgmsg(image, "bgr8")
