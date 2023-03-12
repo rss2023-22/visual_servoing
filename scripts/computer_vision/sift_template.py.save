@@ -102,8 +102,14 @@ def cd_template_matching(img, template):
 
     # check 6 different methods for template matching
     # tracking
-    best_val = None # (max_val, top_left_coord, bottom_right_coord)
+    best_val = -np.inf
+    best_top_left = None
+    best_bottom_right = None
     
+    # All the 6 methods for comparison in a list
+    methods = ['cv.TM_CCOEFF', 'cv.TM_CCOEFF_NORMED', 'cv.TM_CCORR',
+                'cv.TM_CCORR_NORMED', 'cv.TM_SQDIFF', 'cv.TM_SQDIFF_NORMED']
+
     # Loop over different scales of image
     for scale in np.linspace(1.5, .5, 50):
         # Resize the image
@@ -122,22 +128,21 @@ def cd_template_matching(img, template):
             method = cv2.TM_CCOEFF_NORMED
             res = cv2.matchTemplate(img_canny,resized_template,method)
             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
-
+            
             # for TM_CCOEFF_NORMED method, take max
-            if (best_val is None) or (max_val > best_val[0]):
-                best_val = (max_val, max_loc, (max_loc[0] + w, max_loc[1] + h))
+            if max_val > best_val:
+                best_val = max_val
+                best_top_left = max_loc
+                best_bottom_right = (best_top_left[0] + w, best_top_left[1] + h)
+        
+    # cv2.rectangle(img_canny,best_top_left, best_bottom_right, 255, 2)
 
-    # cv2.rectangle(img_canny,best_val[1], best_val[2], 255, 2)
-
-#     plt.subplot(121),plt.imshow(res,cmap = 'gray')
-#     plt.title('Matching Result'), plt.xticks([]), plt.yticks([])
-#     plt.subplot(122),plt.imshow(img_canny,cmap = 'gray')
-#     plt.title('Detected Point'), plt.xticks([]), plt.yticks([])
+    # plt.subplot(121),plt.imshow(res,cmap = 'gray')
+    # plt.title('Matching Result'), plt.xticks([]), plt.yticks([])
+    # plt.subplot(122),plt.imshow(img_canny,cmap = 'gray')
+    # plt.title('Detected Point'), plt.xticks([]), plt.yticks([])
     
-    bounding_box = (best_val[1], best_val[2])
+    bounding_box = (best_top_left, best_bottom_right)
 
-#     plt.show()
-    final_width = best_val[2][0] - best_val[1][0]
-    final_height = best_val[2][1] - best_val[1][1]
-#     print("resized dimensions, height:", final_height, "width:", final_width)
+    # plt.show()
     return bounding_box
