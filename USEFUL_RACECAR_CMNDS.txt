@@ -1,0 +1,19 @@
+GOOD REF: https://linux.die.net/man/1/rsync
+
+
+
+ssh racecar src racecar@racecar
+	-> ssh to racecar
+
+
+rsync -rv racecar@racecar:/home/racecar/racecar_ws/src ~/racecar_ws/src/RACECARSRC
+	-> pull source from racecar to local:
+
+rsync -rv src racecar@racecar:/home/racecar/racecar_ws
+	-> push locla to racecar
+
+teleop
+	-> start racecar
+
+roslaunch wall_follower wall_follower.launch
+	-> launch wall follower
