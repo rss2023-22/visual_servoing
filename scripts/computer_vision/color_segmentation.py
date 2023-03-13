@@ -81,7 +81,7 @@ def cd_color_segmentation(img, template):
 	viz_dilated = False
 	viz_box = False
 	set_bounds = 7 # 1,2,3,4,5,6
-	line_following = False
+	line_following = True
 
 	# BEGIN CODE 
 	############
