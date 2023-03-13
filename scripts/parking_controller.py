@@ -17,7 +17,7 @@ class ParkingController():
             self.relative_cone_callback)
 
         DRIVE_TOPIC = rospy.get_param("~drive_topic") # set in launch file; different for simulator vs racecar
-        LINE_FOLLOWING = rospy.get_param("visual_servoing/line_following")
+        LINE_FOLLOWING = 1 #rospy.get_param("visual_servoing/line_following")
         self.drive_pub = rospy.Publisher(DRIVE_TOPIC,
             AckermannDriveStamped, queue_size=10)
         self.error_pub = rospy.Publisher("/parking_error",
@@ -26,7 +26,7 @@ class ParkingController():
         if LINE_FOLLOWING == 1:
             self.parking_distance = .3 # meters; try playing with this number!
         else:
-            self.parking_distance = rospy.get_param("visual_servoing/parking_distance")
+            self.parking_distance = .75 #rospy.get_param("visual_servoing/parking_distance")
         self.relative_x = 0
         self.relative_y = 0
         
