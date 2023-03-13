@@ -35,14 +35,10 @@ def cd_color_segmentation(img, template):
 	"""
 
 	def lineFollowingImgCreation(img):
-		lowBound = 200
+		lowBound = 250
 		upBound = 300
-		dims = img.shape
-		for i in range(dims[0]):
-			for j in range(dims[1]):
-				if i<lowBound or i>upBound:
-					img[i][j] = (1,1,1)
-		return img
+		img = img[lowBound:upBound]
+		return img,lowBound,upBound
 
 
 	def lookupBounds(x):
@@ -88,7 +84,7 @@ def cd_color_segmentation(img, template):
 
 	# step 0: limit range if line following
 	if line_following:
-		img = lineFollowingImgCreation(img)
+		img, lowBound, upBound = lineFollowingImgCreation(img)
 		set_bounds = 9
 	if viz_original_img:
 		image_print(img) # see original image
@@ -125,8 +121,8 @@ def cd_color_segmentation(img, template):
 
 	# step 5: get bounding box
 	x,y,w,h = cv2.boundingRect(cnt)
-	bounding_box = ((x,y),(x+w,y+h))
-	print(bounding_box)
+	bounding_box = ((x,y+lowBound),(x+w,y+h+lowBound))
+	#print(bounding_box)
 
 	# step 6: display original img with bounding rectangle!
 	img = cv2.rectangle(img,bounding_box[0],bounding_box[1],(0,255,0),2)
