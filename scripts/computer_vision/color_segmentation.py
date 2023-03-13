@@ -68,7 +68,7 @@ def cd_color_segmentation(img, template):
 			lower_bound = np.array([5,180,190])
 			upper_bound = np.array([35,255,255])
 		elif x == 9: # FOR TAPE!!
-			lower_bound = np.array([5,180,100])
+			lower_bound = np.array([1,100,50])
 			upper_bound = np.array([35,255,255])
 		return [lower_bound,upper_bound]
 
@@ -118,7 +118,10 @@ def cd_color_segmentation(img, template):
 	if len(contours) == 0: # no box:
 		return ((0,0),(0,0))
 	
-	cnt = contours[-1]
+	if line_following:
+		cnt = contours[0]
+	else:
+		cnt = contours[-1]
 
 	# step 5: get bounding box
 	x,y,w,h = cv2.boundingRect(cnt)
