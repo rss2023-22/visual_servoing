@@ -72,13 +72,13 @@ def cd_color_segmentation(img, template):
 	# PARAMS
 	########
 	# decent combos: bounds=6, 1 iter, 2 iter || bounds=7, 2 iter, 6 iter
-	viz_original_img = True
+	viz_original_img = False
 	viz_masked_img = False
 	viz_eroded = False
 	viz_dilated = False
-	viz_box = True
+	viz_box = False
 	set_bounds = 7 # 1,2,3,4,5,6
-	line_following = True
+	line_following = False
 
 	# BEGIN CODE 
 	############
@@ -110,7 +110,7 @@ def cd_color_segmentation(img, template):
 
 	# step 4: get contours
 	ret,thresh = cv2.threshold(image_dila,127,255,0)
-	contours, _ = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE) # CHANGE BCK
+	_, contours, _ = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE) # CHANGE BCK
 	if len(contours) == 0: # no box:
 		return ((0,0),(0,0))
 	
