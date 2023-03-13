@@ -67,16 +67,19 @@ def cd_color_segmentation(img, template):
 		elif x == 7: # similar to 5 but more sensitive to lighter oranges, probably the best so far with erode and dilate. Good with 2 and 5 iters. 
 			lower_bound = np.array([5,180,190])
 			upper_bound = np.array([35,255,255])
+		elif x == 9: # FOR TAPE!!
+			lower_bound = np.array([5,180,100])
+			upper_bound = np.array([35,255,255])
 		return [lower_bound,upper_bound]
 
 	# PARAMS
 	########
 	# decent combos: bounds=6, 1 iter, 2 iter || bounds=7, 2 iter, 6 iter
-	viz_original_img = True
+	viz_original_img = False
 	viz_masked_img = False
 	viz_eroded = False
 	viz_dilated = False
-	viz_box = True
+	viz_box = False
 	set_bounds = 7 # 1,2,3,4,5,6
 	line_following = True
 
@@ -86,6 +89,7 @@ def cd_color_segmentation(img, template):
 	# step 0: limit range if line following
 	if line_following:
 		img = lineFollowingImgCreation(img)
+		set_bounds = 9
 	if viz_original_img:
 		image_print(img) # see original image
 
@@ -110,7 +114,7 @@ def cd_color_segmentation(img, template):
 
 	# step 4: get contours
 	ret,thresh = cv2.threshold(image_dila,127,255,0)
-	contours, _ = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE) # CHANGE BCK
+	_, contours, _ = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE) # CHANGE BCK
 	if len(contours) == 0: # no box:
 		return ((0,0),(0,0))
 	
@@ -119,6 +123,7 @@ def cd_color_segmentation(img, template):
 	# step 5: get bounding box
 	x,y,w,h = cv2.boundingRect(cnt)
 	bounding_box = ((x,y),(x+w,y+h))
+	print(bounding_box)
 
 	# step 6: display original img with bounding rectangle!
 	img = cv2.rectangle(img,bounding_box[0],bounding_box[1],(0,255,0),2)
