@@ -86,12 +86,17 @@ def cd_color_segmentation(img, template = None, line_following = 1.0, testing = 
 
 	# step 3: use erosion and dilution
 	kernel1 = np.ones((5,5), np.uint8)
-	image_erod = cv2.erode(imagemask,kernel1,iterations=1) # 1 # 2
-	if testing and viz_eroded:
-		image_print(image_erod)
-	image_dila = cv2.dilate(image_erod,kernel1,iterations=2) # 2 # 5
-	if testing and viz_dilated:
-		image_print(image_dila)
+	if not line_following:
+		image_erod = cv2.erode(imagemask,kernel1,iterations=1) # 1 # 2
+		if testing and viz_eroded:
+			image_print(image_erod)
+		image_dila = cv2.dilate(image_erod,kernel1,iterations=2) # 2 # 5
+		if testing and viz_dilated:
+			image_print(image_dila)
+	else:
+		image_erod = cv2.erode(imagemask,kernel1,iterations=2)
+		image_dila = cv2.dilate(image_erod,kernel1,iterations=5)
+
 
 	# step 4: get contours, if multiple, take contour closest to the center of img (for line following)
 	ret,thresh = cv2.threshold(image_dila,127,255,0)
