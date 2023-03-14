@@ -50,7 +50,6 @@ def cd_color_segmentation(img, template = None, line_following = 1.0, testing = 
 			upper_bound = np.array([35,255,255])
 		return [lower_bound,upper_bound]
 
-	print(line_following)
 	# SET PARAMS
 	if line_following == 1.0:
 		line_following = True
