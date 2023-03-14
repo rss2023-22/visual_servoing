@@ -22,6 +22,8 @@ class ConeDetector():
     """
     LINE_FOLLOWING = 1.0 #rospy.get_param("visual_servoing/line_following")
     TESTING = False # to pass to color_segmentation for minimal latency and no visualization
+    LOW_BOUND = 225
+    HIGH_BOUND = 275
 
     def __init__(self):
         # toggle line follower vs cone parker

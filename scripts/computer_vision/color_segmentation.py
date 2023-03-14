@@ -23,7 +23,7 @@ def image_print(img):
 	cv2.waitKey(0)
 	cv2.destroyAllWindows()
 
-def cd_color_segmentation(img, template = None, line_following = 1.0, testing = True):
+def cd_color_segmentation(img, template = None, line_following = 1.0, testing = True,lowBound = 225,upBound=275):
 	"""
 	Implement the cone detection using color segmentation algorithm
 	Input:
@@ -34,9 +34,7 @@ def cd_color_segmentation(img, template = None, line_following = 1.0, testing = 
 				(x1, y1) is the top left of the bbox and (x2, y2) is the bottom right of the bbox
 	"""
 
-	def cropImg(img):
-		lowBound = 250
-		upBound = 300
+	def cropImg(img,lowBound,upBound):
 		img = img[lowBound:upBound]
 		return img,lowBound,upBound
 
@@ -57,7 +55,7 @@ def cd_color_segmentation(img, template = None, line_following = 1.0, testing = 
 		line_following = False
 	if testing:
 		testing = True
-		viz_original_img = False
+		viz_original_img = True
 		viz_masked_img = False
 		viz_eroded = False
 		viz_dilated = False
@@ -71,7 +69,7 @@ def cd_color_segmentation(img, template = None, line_following = 1.0, testing = 
 
 	# step 0: limit range if line following
 	if line_following: # crop image
-		img, lowBound, upBound = cropImg(img)
+		img, lowBound, upBound = cropImg(img,lowBound,upBound)
 
 	if testing and viz_original_img:
 		image_print(img) # see original image
