@@ -32,7 +32,7 @@ class ParkingController():
         
         self.angle_tolerance = 0.1
         self.distance_tolerance = 0.07
-        self.turning_radius = 0.9 #turning radius of the car
+        self.turning_radius = 0.6 #turning radius of the car
         self.drive_speed = 1
         self.max_steering_angle = 0.34
         self.forward = None
