@@ -25,14 +25,16 @@ class ParkingController():
 
         if LINE_FOLLOWING == 1:
             self.parking_distance = .3 # meters; try playing with this number!
+            self.turning_radius = 0.4 #turning radius of the car
         else:
             self.parking_distance = .75 #rospy.get_param("visual_servoing/parking_distance")
+            self.turning_radius = 0.9
+        
         self.relative_x = 0
         self.relative_y = 0
-        
         self.angle_tolerance = 0.1
         self.distance_tolerance = 0.07
-        self.turning_radius = 0.6 #turning radius of the car
+        
         self.drive_speed = 1
         self.max_steering_angle = 0.34
         self.forward = None
