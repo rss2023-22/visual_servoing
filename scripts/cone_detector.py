@@ -20,6 +20,9 @@ class ConeDetector():
     Subscribes to: /zed/zed_node/rgb/image_rect_color (Image) : the live RGB image from the onboard ZED camera.
     Publishes to: /relative_cone_px (ConeLocationPixel) : the coordinates of the cone in the image frame (units are pixels).
     """
+    LINE_FOLLOWING = rospy.get_param("visual_servoing/line_following")
+    TESTING = False # to pass to color_segmentation for minimal latency and no visualization
+
     def __init__(self):
         # toggle line follower vs cone parker
         self.LineFollower = False
@@ -38,7 +41,7 @@ class ConeDetector():
         # convert it to the car frame.
 
         img = self.bridge.imgmsg_to_cv2(image_msg, "bgr8") # is this right? convert msg to cv2 format. 
-        bounding_box = cd_color_segmentation(img,None)  # (x,y),(x+w,y+h)
+        bounding_box = cd_color_segmentation(img,None,self.LINE_FOLLOWING,self.TESTING)  # (x,y),(x+w,y+h)
         noCone = ((0,0),(0,0))
              
 
