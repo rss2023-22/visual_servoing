@@ -16,16 +16,16 @@ import pdb
 ###############################################################
 
 def image_print(img):
-	"""
-	Helper function to print out images, for debugging.
-	Press any key to continue.
-	"""
-	winname = "Image"
-	cv2.namedWindow(winname)        # Create a named window
-	cv2.moveWindow(winname, 40,30)  # Move it to (40,30)
-	cv2.imshow(winname, img)
-	cv2.waitKey()
-	cv2.destroyAllWindows()
+    """
+    Helper function to print out images, for debugging.
+    Press any key to continue.
+    """
+    winname = "Image"
+    cv2.namedWindow(winname)        # Create a named window
+    cv2.moveWindow(winname, 40,30)  # Move it to (40,30)
+    cv2.imshow(winname, img)
+    cv2.waitKey()
+    cv2.destroyAllWindows()
 
 def cd_sift_ransac(img, template):
     """
