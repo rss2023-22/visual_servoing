@@ -6,8 +6,8 @@ import rospy
 from rospy.numpy_msg import numpy_msg
 from sensor_msgs.msg import LaserScan
 from ackermann_msgs.msg import AckermannDriveStamped
-from visualization_msgs.msg import Marker
-from visualization_tools import *
+#from visualization_msgs.msg import Marker
+#from visualization_tools import *
 import tf2_ros
 
 class SafetyController:
