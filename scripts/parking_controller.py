@@ -24,18 +24,20 @@ class ParkingController():
             ParkingError, queue_size=10)
 
         if LINE_FOLLOWING == 1:
-            self.parking_distance = .3 # meters; try playing with this number!
+            self.parking_distance = 0.01 # meters; try playing with this number!
             self.turning_radius = 0.4 #turning radius of the car
+            self.distance_tolerance = 0.01
         else:
             self.parking_distance = .75 #rospy.get_param("visual_servoing/parking_distance")
             self.turning_radius = 0.9
+            self.distance_tolerance = 0.07
         
         self.relative_x = 0
         self.relative_y = 0
         self.angle_tolerance = 0.1
-        self.distance_tolerance = 0.07
         
-        self.drive_speed = 1
+        
+        self.drive_speed = 4
         self.max_steering_angle = 0.34
         self.forward = None
 
@@ -54,7 +56,7 @@ class ParkingController():
 
         #################################
         
-        relative_angle = np.arctan2(self.relative_y,self.relative_x)
+        relative_angle = 0.5*np.arctan2(self.relative_y,self.relative_x)
         relative_distance = (self.relative_x**2+self.relative_y**2)**0.5
         
         drive_cmd.header.frame_id = 'base_link'
