@@ -38,7 +38,7 @@ class ParkingController():
         
         
         self.drive_speed = 4
-        self.max_steering_angle = 0.34
+        self.max_steering_angle = 0.3
         self.forward = None
 
     def relative_cone_callback(self, msg):
@@ -49,6 +49,12 @@ class ParkingController():
         When x_pos and y_pos are both exactly zero, the cone is assumed to not be in frame
         In this case, the car will do nothing
         '''
+        rel_x_error = abs(self.relative_x-msg.x_pos)
+        rel_y_error = abs(self.relative_y-msg.y_pos)
+        rel_y_error_cutoff = 1.5
+        # if rel_y_error > rel_y_error_cutoff:
+            # print('SKIPPED CMND WITH REL_Y_ERROR: '+str(rel_y_error))
+            # pass
         self.relative_x = msg.x_pos
         self.relative_y = msg.y_pos
         
@@ -56,7 +62,7 @@ class ParkingController():
 
         #################################
         
-        relative_angle = 0.5*np.arctan2(self.relative_y,self.relative_x)
+        relative_angle = 0.3*np.arctan2(self.relative_y,self.relative_x)
         relative_distance = (self.relative_x**2+self.relative_y**2)**0.5
         
         drive_cmd.header.frame_id = 'base_link'

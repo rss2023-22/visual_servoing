@@ -39,7 +39,7 @@ def cd_color_segmentation(img, template = None, line_following = 1.0, testing = 
 			img = img[225:275]
 			return img,225,275, None, None
 		if line_color == 'white':
-			return img[150:275], 150, 275, None, None
+			return img[150:275,0:400], 150, 275, 0, 400
 
 
 	def lookupBounds(line_following,color):
@@ -51,7 +51,7 @@ def cd_color_segmentation(img, template = None, line_following = 1.0, testing = 
 				lower_bound = np.array([1,100,50]) #np.array([1,100,50]) # upper_bound = np.array([35,255,255])
 				upper_bound = np.array([35,255,255])
 			if color == 'white':
-				lower_bound = np.array([10,0,130]) #np.array([1,100,50]) # upper_bound = np.array([35,255,255])
+				lower_bound = np.array([20,0,160]) #np.array([1,100,50]) # upper_bound = np.array([35,255,255])
 				upper_bound = np.array([190,50,255])
 		return [lower_bound,upper_bound]
 
@@ -68,8 +68,7 @@ def cd_color_segmentation(img, template = None, line_following = 1.0, testing = 
 		viz_original_img = False
 		viz_masked_img = False
 		viz_eroded = False
-		viz_dilated = True
-		viz_edge = False
+		viz_dilated = False
 		viz_box = True
 	else:
 		testing = False
@@ -106,51 +105,76 @@ def cd_color_segmentation(img, template = None, line_following = 1.0, testing = 
 			image_print(image_dila)
 	else:
 		if line_color == 'white':
-			kernel1 = np.ones((2,2), np.uint8)
+			kernel1 = np.ones((4,4), np.uint8)
 		image_erod = cv2.erode(imagemask,kernel1,iterations=2) # 2 orange line
 		if testing and viz_eroded:
 			image_print(image_erod)
 		image_dila = cv2.dilate(image_erod,kernel1,iterations=5) # 5 orange line # 
 		if testing and viz_dilated:
 			image_print(image_dila)
-		image_edge = cv2.Canny(image_dila,50,200,None,3)
-		if testing and viz_edge:
-			image_print(image_edge)
-			
-	lines = cv2.HoughLines(image_edge,1,np.pi/180,45,None,0,0)
-	baseline = len(imgOrig)+300
-	eval_line = lambda line,y: (line[0][0]-np.sin(line[0][1])*(y-lowBoundvert))/np.cos(line[0][1])
-	best_left,best_right = None,None
-	if lines is not None:
-		for i in range(0,len(lines)):
-			if abs(np.cos(lines[i][0][1])) < 0.01: continue
-			e = eval_line(lines[i],baseline)
-			if e < len(imgOrig[0])*0.5 and (best_left is None or e > eval_line(best_left,baseline)):
-				best_left = lines[i]
-			elif e >= len(imgOrig[0])*0.5 and (best_right is None or e < eval_line(best_right,baseline)):
-				best_right = lines[i]
-			#imgOrig = cv2.line(imgOrig,(int(rho/a),lowBoundvert),(int((rho-b*(len(imgOrig)-lowBoundvert))/a),len(imgOrig)),(255,128,0),2)
-		#if testing and viz_box: image_print(imgOrig)
-	
-	if best_left is None or best_right is None:
-		#TODO: some kind of standardized way to say that not enough lines are detected
-		return ((0,0),(1,1))
-	start_x,start_y = (int(eval_line(best_left,lowBoundvert)+eval_line(best_right,lowBoundvert))//2,lowBoundvert) 
-	end_x,end_y = (int(eval_line(best_left,len(imgOrig))+eval_line(best_right,len(imgOrig)))//2,len(imgOrig))
-	slope = (end_y - start_y)/float((end_x-start_x)+0.001)
 
+
+	# step 4: get contours, if multiple, take contour closest to the center of img (for line following)
+	ret,thresh = cv2.threshold(image_dila,127,255,0)
+	if testing:
+		contours, _ = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE) # opencvNew version
+	else:
+		_, contours, _ = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE) # opencvOld version
+	if len(contours) == 0: # no box!
+		return ((0,0),(0,0))
 	
-	midpoint_x,midpoint_y = (start_x+end_x)/2 , (start_y+end_y)/2
-	bb_size = 10
-	constant_offset_y = -90
-	constant_offset_x = constant_offset_y/slope
-	bb = ((int(midpoint_x-bb_size+constant_offset_x),int(midpoint_y-bb_size+constant_offset_y)),(int(midpoint_x+bb_size+constant_offset_x),int(midpoint_y+bb_size+constant_offset_y)))
-	#print(bb)
-	if testing and viz_box:
-		imgOrig = cv2.line(imgOrig,(int(eval_line(best_left,lowBoundvert)),lowBoundvert),(int(eval_line(best_left,len(imgOrig))),len(imgOrig)),(255,128,0),2)
-		imgOrig = cv2.line(imgOrig,(int(eval_line(best_right,lowBoundvert)),lowBoundvert),(int(eval_line(best_right,len(imgOrig))),len(imgOrig)),(255,128,0),2)
-		imgOrig = cv2.line(imgOrig,(start_x,start_y),(end_x,end_y),(0,255,0),3)
-		img = cv2.rectangle(imgOrig,bb[0],bb[1],(0,255,0),2)
-		image_print(img)
-		
-	return bb
+	def getDist(coords1,coords2): # x coord only
+		return abs(coords1[0]-coords2[0])
+	
+	if line_following:
+		if line_color == 'orange':
+			image_center = np.asarray(image_dila.shape) / 2
+			image_center = tuple(image_center.astype('int32'))
+			closest_contour = None 
+			min_dist = float('Inf')
+			for contour in contours:
+				M = cv2.moments(contour)
+				center_X = int(M["m10"] / M["m00"]); center_Y = int(M["m01"] / M["m00"])
+				distances_to_center = getDist((image_center[1],image_center[0]), (center_X,center_Y))
+				if distances_to_center < min_dist:
+					min_dist = distances_to_center; closest_contour = contour
+			cnt = closest_contour
+		if line_color == 'white':
+			image_center = np.asarray(image_dila.shape) / 2
+			image_center = tuple(image_center.astype('int32'))
+			closest_contour = None 
+			min_dist = float('Inf')
+			for contour in contours:
+				M = cv2.moments(contour)
+				center_X = int(M["m10"] / M["m00"]); center_Y = int(M["m01"] / M["m00"])
+				if center_X < min_dist:
+					min_dist = center_X
+					closest_contour = contour
+				# print((center_X,center_Y))
+				# if center_X > 300:
+				# 	continue
+				# distances_to_center = getDist((image_center[1],image_center[0]), (center_X,center_Y))
+				# if distances_to_center < min_dist:
+				# 	min_dist = distances_to_center; closest_contour = contour
+			cnt = closest_contour
+	else:
+		cnt = contours[-1]
+
+	# step 5: get bounding box
+	x,y,w,h = cv2.boundingRect(cnt)
+	if line_following:
+		if upboundSide != None:
+			constant_offset = 200
+			bounding_box = ((x+lowboundSide+constant_offset,y+lowBoundvert),(x+w+constant_offset,y+upBoundvert))
+		else:
+			bounding_box = ((x,y+lowBoundvert),(x+w,y+h+upBoundvert))
+	else:
+		bounding_box = ((x,y),(x+w,y+h))
+
+	# step 6: display original img with bounding rectangle!
+	if testing:
+		img = cv2.rectangle(imgOrig,bounding_box[0],bounding_box[1],(0,255,0),2)
+		if viz_box:
+			image_print(img)
+
+	return bounding_box
