@@ -23,7 +23,7 @@ def image_print(img):
 	cv2.waitKey(0)
 	cv2.destroyAllWindows()
 
-def cd_color_segmentation(img, template = None, line_following = 1.0, testing = True,lowBound = 225,upBound=275):
+def cd_color_segmentation(img, template = None, line_following = 1.0, testing = True,lowBound = 150,upBound=450):
 	"""
 	Implement the cone detection using color segmentation algorithm
 	Input:
@@ -44,8 +44,8 @@ def cd_color_segmentation(img, template = None, line_following = 1.0, testing = 
 			lower_bound = np.array([5,180,190])
 			upper_bound = np.array([35,255,255])
 		else: # for line following orange tape
-			lower_bound = np.array([1,100,50]) #np.array([1,100,50]) # upper_bound = np.array([35,255,255])
-			upper_bound = np.array([35,255,255])
+			lower_bound = np.array([0,120,70]) #np.array([1,100,50]) # upper_bound = np.array([35,255,255])
+			upper_bound = np.array([50,255,255])
 		return [lower_bound,upper_bound]
 
 	# SET PARAMS
@@ -56,9 +56,9 @@ def cd_color_segmentation(img, template = None, line_following = 1.0, testing = 
 	if testing:
 		testing = True
 		viz_original_img = True
-		viz_masked_img = False
-		viz_eroded = False
-		viz_dilated = False
+		viz_masked_img = True
+		viz_eroded = True
+		viz_dilated = True
 		viz_box = True
 	else:
 		testing = False
@@ -66,6 +66,7 @@ def cd_color_segmentation(img, template = None, line_following = 1.0, testing = 
 	# BEGIN CODE 
 	############
 	imgOrig = img
+	_, width, _ = np.shape(img)
 
 	# step 0: limit range if line following
 	if line_following: # crop image
@@ -86,6 +87,8 @@ def cd_color_segmentation(img, template = None, line_following = 1.0, testing = 
 
 	# step 3: use erosion and dilution
 	kernel1 = np.ones((5,5), np.uint8)
+	kernel2 = np.ones((10,10), np.uint8)
+	#kernel1 = cv2.getStructuringElement(cv2.MORPH_RECT, (21,2))
 	if not line_following:
 		image_erod = cv2.erode(imagemask,kernel1,iterations=1) # 1 # 2
 		if testing and viz_eroded:
@@ -94,8 +97,13 @@ def cd_color_segmentation(img, template = None, line_following = 1.0, testing = 
 		if testing and viz_dilated:
 			image_print(image_dila)
 	else:
-		image_erod = cv2.erode(imagemask,kernel1,iterations=2)
-		image_dila = cv2.dilate(image_erod,kernel1,iterations=5)
+		image_erod = cv2.erode(imagemask,kernel1,iterations=1)
+		if testing and viz_eroded:
+			image_print(image_erod)
+		image_dila = cv2.dilate(image_erod,kernel2,iterations=4)
+		if testing and viz_dilated:
+			image_print(image_dila)
+
 
 
 	# step 4: get contours, if multiple, take contour closest to the center of img (for line following)
@@ -125,10 +133,30 @@ def cd_color_segmentation(img, template = None, line_following = 1.0, testing = 
 	else:
 		cnt = contours[-1]
 
+	vx,vy,x,y = cv2.fitLine(cnt,cv2.DIST_L2,0,0.01,0.01)
+	lefty = int((-x*vy/vx)+y)
+	righty = int(((width-x)*vy/vx)+y)
+	#print(line)
+
 	# step 5: get bounding box
 	x,y,w,h = cv2.boundingRect(cnt)
+	#print(image_center)
+
+
 	if line_following:
 		bounding_box = ((x,y+lowBound),(x+w,y+h+lowBound))
+		middle = 336
+		x1,x2 = bounding_box[0][0], bounding_box[1][0]
+		if abs(x1-middle) > 200 or abs(x2-middle) > 200:
+			if vy/vx > 0: 
+				bb = ((x1-5,y+lowBound-5),(x1+5,y+lowBound+5))
+			else:
+				bb = ((x1+5,y+lowBound+5),(x1-5,y+lowBound-5))
+		else:
+			bb = bounding_box
+
+		bounding_box = bb
+		#print(bounding_box)
 	else:
 		bounding_box = ((x,y),(x+w,y+h))
 
@@ -136,6 +164,8 @@ def cd_color_segmentation(img, template = None, line_following = 1.0, testing = 
 	if testing:
 		img = cv2.rectangle(imgOrig,bounding_box[0],bounding_box[1],(0,255,0),2)
 		if viz_box:
+			image_print(img)
+			img = cv2.line(img,(width-1,righty),(0,lefty),(0,255,0),2)
 			image_print(img)
 
 	return bounding_box
