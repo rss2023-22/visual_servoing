@@ -23,7 +23,7 @@ def image_print(img):
 	cv2.waitKey(0)
 	cv2.destroyAllWindows()
 
-def cd_color_segmentation(img, template = None, line_following = 1.0, testing = True,lowBound = 150,upBound=450):
+def cd_color_segmentation(img, template = None, line_following = 1.0, testing = True,lowBound = 250,upBound=376):
 	"""
 	Implement the cone detection using color segmentation algorithm
 	Input:
@@ -56,8 +56,8 @@ def cd_color_segmentation(img, template = None, line_following = 1.0, testing = 
 	if testing:
 		testing = True
 		viz_original_img = True
-		viz_masked_img = True
-		viz_eroded = True
+		viz_masked_img = False
+		viz_eroded = False
 		viz_dilated = True
 		viz_box = True
 	else:
@@ -86,7 +86,7 @@ def cd_color_segmentation(img, template = None, line_following = 1.0, testing = 
 		image_print(imagemask)
 
 	# step 3: use erosion and dilution
-	kernel1 = np.ones((5,5), np.uint8)
+	kernel1 = np.ones((8,8), np.uint8)
 	kernel2 = np.ones((10,10), np.uint8)
 	#kernel1 = cv2.getStructuringElement(cv2.MORPH_RECT, (21,2))
 	if not line_following:
@@ -108,10 +108,7 @@ def cd_color_segmentation(img, template = None, line_following = 1.0, testing = 
 
 	# step 4: get contours, if multiple, take contour closest to the center of img (for line following)
 	ret,thresh = cv2.threshold(image_dila,127,255,0)
-	if testing:
-		contours, _ = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE) # opencvNew version
-	else:
-		_, contours, _ = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE) # opencvOld version
+	contours, _ = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE) # opencvNew version
 	if len(contours) == 0: # no box!
 		return ((0,0),(0,0))
 	
@@ -122,16 +119,21 @@ def cd_color_segmentation(img, template = None, line_following = 1.0, testing = 
 		image_center = np.asarray(image_dila.shape) / 2
 		image_center = tuple(image_center.astype('int32'))
 		closest_contour = None 
-		min_dist = float('Inf')
+		min_dist = float('-Inf')
 		for contour in contours:
 			M = cv2.moments(contour)
 			center_X = int(M["m10"] / M["m00"]); center_Y = int(M["m01"] / M["m00"])
 			distances_to_center = getDist((image_center[1],image_center[0]), (center_X,center_Y))
-			if distances_to_center < min_dist:
-				min_dist = distances_to_center; closest_contour = contour
+			x,y,w,h = cv2.boundingRect(contour)
+			if w > min_dist:
+				min_dist = w; closest_contour = contour
 		cnt = closest_contour
 	else:
 		cnt = contours[-1]
+
+	# area = cv2.contourArea(cnt)
+	# if area < 5000:
+	# 	return ((-1,-1),(-1,-1))
 
 	vx,vy,x,y = cv2.fitLine(cnt,cv2.DIST_L2,0,0.01,0.01)
 	lefty = int((-x*vy/vx)+y)
@@ -147,11 +149,11 @@ def cd_color_segmentation(img, template = None, line_following = 1.0, testing = 
 		bounding_box = ((x,y+lowBound),(x+w,y+h+lowBound))
 		middle = 336
 		x1,x2 = bounding_box[0][0], bounding_box[1][0]
-		if abs(x1-middle) > 200 or abs(x2-middle) > 200:
+		if abs(x1-middle) > 240 or abs(x2-middle) > 240 or abs(x1-x2) > 200:
 			if vy/vx > 0: 
-				bb = ((x1-5,y+lowBound-5),(x1+5,y+lowBound+5))
+				bb = ((x1-5,min(y+lowBound-5,y+lowBound+5)),(x1+5,max(y+lowBound-5,y+lowBound+5)))
 			else:
-				bb = ((x1+5,y+lowBound+5),(x1-5,y+lowBound-5))
+				bb = ((x2-5,y+lowBound-5),(x2+5,y+lowBound+5))
 		else:
 			bb = bounding_box
 
@@ -165,7 +167,6 @@ def cd_color_segmentation(img, template = None, line_following = 1.0, testing = 
 		img = cv2.rectangle(imgOrig,bounding_box[0],bounding_box[1],(0,255,0),2)
 		if viz_box:
 			image_print(img)
-			img = cv2.line(img,(width-1,righty),(0,lefty),(0,255,0),2)
-			image_print(img)
+	
 
 	return bounding_box
