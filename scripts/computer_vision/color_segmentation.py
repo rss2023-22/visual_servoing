@@ -23,7 +23,7 @@ def image_print(img):
 	cv2.waitKey(0)
 	cv2.destroyAllWindows()
 
-def cd_color_segmentation(img, template = None, line_following = 1.0, testing = True,lowBound = 250,upBound=376):
+def cd_color_segmentation(img, template = None, line_following = 1.0, testing = True,lowBound = 220,upBound=376): # 250
 	"""
 	Implement the cone detection using color segmentation algorithm
 	Input:
@@ -56,8 +56,8 @@ def cd_color_segmentation(img, template = None, line_following = 1.0, testing = 
 	if testing:
 		testing = True
 		viz_original_img = True
-		viz_masked_img = False
-		viz_eroded = False
+		viz_masked_img = True
+		viz_eroded = True
 		viz_dilated = True
 		viz_box = True
 	else:
@@ -100,7 +100,7 @@ def cd_color_segmentation(img, template = None, line_following = 1.0, testing = 
 		image_erod = cv2.erode(imagemask,kernel1,iterations=1)
 		if testing and viz_eroded:
 			image_print(image_erod)
-		image_dila = cv2.dilate(image_erod,kernel2,iterations=4)
+		image_dila = cv2.dilate(image_erod,kernel2,iterations=3)
 		if testing and viz_dilated:
 			image_print(image_dila)
 
@@ -123,10 +123,11 @@ def cd_color_segmentation(img, template = None, line_following = 1.0, testing = 
 		for contour in contours:
 			M = cv2.moments(contour)
 			center_X = int(M["m10"] / M["m00"]); center_Y = int(M["m01"] / M["m00"])
-			distances_to_center = getDist((image_center[1],image_center[0]), (center_X,center_Y))
-			x,y,w,h = cv2.boundingRect(contour)
-			if w > min_dist:
-				min_dist = w; closest_contour = contour
+			#distances_to_center = getDist((image_center[1],image_center[0]), (center_X,center_Y))
+			#x,y,w,h = cv2.boundingRect(contour)
+			area = cv2.contourArea(contour)
+			if area > min_dist:
+				min_dist = area; closest_contour = contour
 		cnt = closest_contour
 	else:
 		cnt = contours[-1]
@@ -149,7 +150,7 @@ def cd_color_segmentation(img, template = None, line_following = 1.0, testing = 
 		bounding_box = ((x,y+lowBound),(x+w,y+h+lowBound))
 		middle = 336
 		x1,x2 = bounding_box[0][0], bounding_box[1][0]
-		if abs(x1-middle) > 240 or abs(x2-middle) > 240 or abs(x1-x2) > 200:
+		if abs(x1-middle) > 240 or abs(x2-middle) > 240:
 			if vy/vx > 0: 
 				bb = ((x1-5,min(y+lowBound-5,y+lowBound+5)),(x1+5,max(y+lowBound-5,y+lowBound+5)))
 			else:
