@@ -18,7 +18,8 @@ class ParkingController():
 
         DRIVE_TOPIC = rospy.get_param("~drive_topic") # set in launch file; different for simulator vs racecar
         LINE_FOLLOWING = 1 #rospy.get_param("visual_servoing/line_following")
-        self.drive_pub = rospy.Publisher(DRIVE_TOPIC,
+        #self.drive_pub = rospy.Publisher(DRIVE_TOPIC,AckermannDriveStamped, queue_size=10)
+        self.drive_pub = rospy.Publisher("/drive_cmnd",
             AckermannDriveStamped, queue_size=10)
         self.error_pub = rospy.Publisher("/parking_error",
             ParkingError, queue_size=10)
