@@ -118,19 +118,23 @@ def cd_color_segmentation(img, template = None, line_following = 1.0, testing = 
 	if line_following:
 		image_center = np.asarray(image_dila.shape) / 2
 		image_center = tuple(image_center.astype('int32'))
-		closest_contour = None 
+		closest_contour = [0,0] 
 		min_dist = float('-Inf')
 		for contour in contours:
 			M = cv2.moments(contour)
 			center_X = int(M["m10"] / M["m00"]); center_Y = int(M["m01"] / M["m00"])
 			#distances_to_center = getDist((image_center[1],image_center[0]), (center_X,center_Y))
-			#x,y,w,h = cv2.boundingRect(contour)
+			x,y,w,h = cv2.boundingRect(contour)
 			area = cv2.contourArea(contour)
 			if area > min_dist:
 				min_dist = area; closest_contour = contour
 		cnt = closest_contour
 	else:
 		cnt = contours[-1]
+
+	
+	if len(cnt) < 3 or cv2.contourArea(cnt) < 2000:
+		return ((0,0),(0,0))
 
 	# area = cv2.contourArea(cnt)
 	# if area < 5000:
@@ -151,7 +155,7 @@ def cd_color_segmentation(img, template = None, line_following = 1.0, testing = 
 		middle = 336
 		x1,x2 = bounding_box[0][0], bounding_box[1][0]
 		if abs(x1-middle) > 240 or abs(x2-middle) > 240:
-			if vy/vx > 0: 
+			if vy/vx > 0 and x1 < 100: 
 				bb = ((x1-5,min(y+lowBound-5,y+lowBound+5)),(x1+5,max(y+lowBound-5,y+lowBound+5)))
 			else:
 				bb = ((x2-5,y+lowBound-5),(x2+5,y+lowBound+5))
