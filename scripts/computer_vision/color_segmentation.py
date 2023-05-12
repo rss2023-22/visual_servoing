@@ -44,7 +44,7 @@ def cd_color_segmentation(img, template = None, line_following = 1.0, testing = 
 			lower_bound = np.array([5,180,190])
 			upper_bound = np.array([35,255,255])
 		else: # for line following orange tape
-			lower_bound = np.array([0,120,70]) #np.array([1,100,50]) # upper_bound = np.array([35,255,255])
+			lower_bound = np.array([0,120,100]) #np.array([1,100,50]) # upper_bound = np.array([35,255,255])
 			upper_bound = np.array([50,255,255])
 		return [lower_bound,upper_bound]
 
